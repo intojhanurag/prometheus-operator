@@ -1287,6 +1287,43 @@ type RocketChatActionConfig struct {
 	Msg *string `json:"msg,omitempty"`
 }
 
+// MattermostConfig configures notifications via Mattermost.
+// It requires Alertmanager >= 0.30.0.
+type MattermostConfig struct {
+	// sendResolved defines whether or not to notify about resolved alerts.
+	// +optional
+	SendResolved *bool `json:"sendResolved,omitempty"`
+	// apiURL defines the secret's key that contains the Mattermost webhook URL.
+	// The secret needs to be in the same namespace as the AlertmanagerConfig
+	// object and accessible by the Prometheus Operator.
+	// +optional
+	APIURL *v1.SecretKeySelector `json:"apiURL,omitempty"`
+	// channel defines the channel to send alerts to.
+	// +optional
+	Channel *string `json:"channel,omitempty"`
+	// iconURL defines the icon URL for the message avatar.
+	// +optional
+	IconURL *URL `json:"iconURL,omitempty"`
+	// iconEmoji defines the emoji to be displayed as an avatar.
+	// +optional
+	IconEmoji *string `json:"iconEmoji,omitempty"`
+	// username defines the username of the message sender.
+	// +optional
+	Username *string `json:"username,omitempty"`
+	// title defines the message title displayed prominently in the message.
+	// +optional
+	Title *string `json:"title,omitempty"`
+	// titleLink defines the URL that the title will link to when clicked.
+	// +optional
+	TitleLink *string `json:"titleLink,omitempty"`
+	// text defines the message text to send.
+	// +optional
+	Text *string `json:"text,omitempty"`
+	// httpConfig defines the HTTP client configuration.
+	// +optional
+	HTTPConfig *HTTPConfig `json:"httpConfig,omitempty"`
+}
+
 // InhibitRule defines an inhibition rule that allows to mute alerts when other
 // alerts are already firing.
 // See https://prometheus.io/docs/alerting/latest/configuration/#inhibit_rule

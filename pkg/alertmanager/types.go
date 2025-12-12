@@ -74,6 +74,8 @@ type globalConfig struct {
 	RocketChatTokenFile   string          `yaml:"rocketchat_token_file,omitempty" json:"rocketchat_token_file,omitempty"`
 	RocketChatTokenID     string          `yaml:"rocketchat_token_id,omitempty" json:"rocketchat_token_id,omitempty"`
 	RocketChatTokenIDFile string          `yaml:"rocketchat_token_id_file,omitempty" json:"rocketchat_token_id_file,omitempty"`
+	MattermostAPIURL      *config.URL     `yaml:"mattermost_api_url,omitempty" json:"mattermost_api_url,omitempty"`
+	MattermostAPIURLFile  string          `yaml:"mattermost_api_url_file,omitempty" json:"mattermost_api_url_file,omitempty"`
 }
 
 type route struct {
@@ -119,6 +121,7 @@ type receiver struct {
 	MSTeamsV2Configs  []*msTeamsV2Config  `yaml:"msteamsv2_configs,omitempty"`
 	JiraConfigs       []*jiraConfig       `yaml:"jira_configs,omitempty"`
 	RocketChatConfigs []*rocketChatConfig `yaml:"rocketchat_configs,omitempty"`
+	MattermostConfigs []*mattermostConfig `yaml:"mattermost_configs,omitempty"`
 }
 
 type webhookConfig struct {
@@ -486,6 +489,20 @@ type rocketChatConfig struct {
 	ThumbURL    string                        `yaml:"thumb_url,omitempty"`
 	LinkNames   bool                          `yaml:"link_names"`
 	Actions     []*rocketchatAttachmentAction `yaml:"actions,omitempty"`
+}
+
+type mattermostConfig struct {
+	VSendResolved *bool             `yaml:"send_resolved,omitempty" json:"send_resolved,omitempty"`
+	HTTPConfig    *httpClientConfig `yaml:"http_config,omitempty" json:"http_config,omitempty"`
+	APIURL        *config.URL       `yaml:"api_url,omitempty" json:"api_url,omitempty"`
+	APIURLFile    string            `yaml:"api_url_file,omitempty" json:"api_url_file,omitempty"`
+	Channel       string            `yaml:"channel,omitempty" json:"channel,omitempty"`
+	Username      string            `yaml:"username,omitempty" json:"username,omitempty"`
+	IconEmoji     string            `yaml:"icon_emoji,omitempty" json:"icon_emoji,omitempty"`
+	IconURL       string            `yaml:"icon_url,omitempty" json:"icon_url,omitempty"`
+	Title         string            `yaml:"title,omitempty" json:"title,omitempty"`
+	TitleLink     string            `yaml:"title_link,omitempty" json:"title_link,omitempty"`
+	Text          string            `yaml:"text,omitempty" json:"text,omitempty"`
 }
 
 type timeInterval config.TimeInterval

@@ -507,6 +507,9 @@ type AlertmanagerGlobalConfig struct {
 	// wechat defines the default WeChat Config
 	// +optional
 	WeChatConfig *GlobalWeChatConfig `json:"wechat,omitempty"`
+	// mattermost defines the default configuration for Mattermost.
+	// +optional
+	MattermostConfig *GlobalMattermostConfig `json:"mattermost,omitempty"`
 }
 
 // AlertmanagerStatus is the most recent observed status of the Alertmanager cluster. Read-only.
@@ -708,6 +711,16 @@ type GlobalVictorOpsConfig struct {
 	//
 	// +optional
 	APIKey *v1.SecretKeySelector `json:"apiKey,omitempty"`
+}
+
+// GlobalMattermostConfig configures global Mattermost parameters.
+type GlobalMattermostConfig struct {
+	// apiURL defines the default Mattermost API URL.
+	//
+	// It requires Alertmanager >= v0.30.0.
+	//
+	// +optional
+	APIURL *URL `json:"apiURL,omitempty"`
 }
 
 // HostPort represents a "host:port" network address.

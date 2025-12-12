@@ -531,6 +531,10 @@ func (cb *ConfigBuilder) convertGlobalConfig(ctx context.Context, in *monitoring
 		return nil, fmt.Errorf("invalid global victorops config: %w", err)
 	}
 
+	if err := cb.convertGlobalMattermostConfig(out, in.MattermostConfig); err != nil {
+		return nil, fmt.Errorf("invalid global mattermost config: %w", err)
+	}
+
 	return out, nil
 }
 
@@ -770,6 +774,18 @@ func (cb *ConfigBuilder) convertReceiver(ctx context.Context, in *monitoringv1al
 		}
 	}
 
+	var mattermostConfigs []*mattermostConfig
+	if l := len(in.MattermostConfigs); l > 0 {
+		mattermostConfigs = make([]*mattermostConfig, l)
+		for i := range in.MattermostConfigs {
+			receiver, err := cb.convertMattermostConfig(ctx, in.MattermostConfigs[i], crKey)
+			if err != nil {
+				return nil, fmt.Errorf("MattermostConfig[%d]: %w", i, err)
+			}
+			mattermostConfigs[i] = receiver
+		}
+	}
+
 	return &receiver{
 		Name:              makeNamespacedString(in.Name, crKey),
 		OpsgenieConfigs:   opsgenieConfigs,
@@ -787,6 +803,7 @@ func (cb *ConfigBuilder) convertReceiver(ctx context.Context, in *monitoringv1al
 		MSTeamsConfigs:    msTeamsConfigs,
 		MSTeamsV2Configs:  msTeamsV2Configs,
 		RocketChatConfigs: rocketchatConfigs,
+		MattermostConfigs: mattermostConfigs,
 	}, nil
 }
 
@@ -2891,4 +2908,51 @@ func checkIsV2Matcher(in ...[]monitoringv1alpha1.Matcher) bool {
 		}
 	}
 	return false
+}
+
+func (cb *ConfigBuilder) convertMattermostConfig(ctx context.Context, in monitoringv1alpha1.MattermostConfig, crKey types.NamespacedName) (*mattermostConfig, error) {
+	out := &mattermostConfig{
+		VSendResolved: in.SendResolved,
+		Channel:       ptr.Deref(in.Channel, ""),
+		Username:      ptr.Deref(in.Username, ""),
+		IconEmoji:     ptr.Deref(in.IconEmoji, ""),
+		IconURL:       string(ptr.Deref(in.IconURL, "")),
+		Title:         ptr.Deref(in.Title, ""),
+		TitleLink:     ptr.Deref(in.TitleLink, ""),
+		Text:          ptr.Deref(in.Text, ""),
+	}
+
+	if in.APIURL != nil {
+		apiURL, err := cb.store.GetSecretKey(ctx, crKey.Namespace, *in.APIURL)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get Mattermost API URL: %w", err)
+		}
+		out.APIURLFile = apiURL
+	}
+
+	if in.HTTPConfig != nil {
+		httpConfig, err := cb.convertHTTPConfig(ctx, in.HTTPConfig, crKey)
+		if err != nil {
+			return nil, err
+		}
+		out.HTTPConfig = httpConfig
+	}
+
+	return out, nil
+}
+
+func (cb *ConfigBuilder) convertGlobalMattermostConfig(out *globalConfig, in *monitoringv1.GlobalMattermostConfig) error {
+	if in == nil {
+		return nil
+	}
+
+	if in.APIURL != nil {
+		u, err := url.Parse(string(*in.APIURL))
+		if err != nil {
+			return fmt.Errorf("parse Mattermost API URL: %w", err)
+		}
+		out.MattermostAPIURL = &config.URL{URL: u}
+	}
+
+	return nil
 }
