@@ -104,6 +104,9 @@ func TestInitializeFromAlertmanagerConfig(t *testing.T) {
 	victorOpsAPIURL := "https://victorops.example.com"
 	invalidVictorOpsAPIURL := "://victorops.example.com"
 
+	mattermostAPIURL := "https://mattermost.example.com"
+	invalidMattermostAPIURL := "://mattermost.example.com"
+
 	tests := []struct {
 		name            string
 		amVersion       *semver.Version
@@ -1425,6 +1428,77 @@ func TestInitializeFromAlertmanagerConfig(t *testing.T) {
 						},
 						{
 							Name: "myreceiver",
+						},
+					},
+					Route: &monitoringv1alpha1.Route{
+						Receiver: "null",
+						Routes: []apiextensionsv1.JSON{
+							{
+								Raw: myrouteJSON,
+							},
+						},
+					},
+				},
+			},
+			matcherStrategy: monitoringv1.AlertmanagerConfigMatcherStrategy{
+				Type: "OnNamespace",
+			},
+			wantErr: true,
+		},
+		{
+			name:      "valid global config with Mattermost API URL",
+			amVersion: &version30,
+			globalConfig: &monitoringv1.AlertmanagerGlobalConfig{
+				MattermostConfig: &monitoringv1.GlobalMattermostConfig{
+					APIURL: ptr.To(monitoringv1.URL(mattermostAPIURL)),
+				},
+			},
+			amConfig: &monitoringv1alpha1.AlertmanagerConfig{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "global-config",
+					Namespace: "mynamespace",
+				},
+				Spec: monitoringv1alpha1.AlertmanagerConfigSpec{
+					Receivers: []monitoringv1alpha1.Receiver{
+						{
+							Name: "null",
+						},
+						{
+							Name: "myreceiver",
+						},
+					},
+					Route: &monitoringv1alpha1.Route{
+						Receiver: "null",
+						Routes: []apiextensionsv1.JSON{
+							{
+								Raw: myrouteJSON,
+							},
+						},
+					},
+				},
+			},
+			matcherStrategy: monitoringv1.AlertmanagerConfigMatcherStrategy{
+				Type: "OnNamespace",
+			},
+			golden: "valid_global_config_with_Mattermost_API_URL.golden",
+		},
+		{
+			name: "global config with invalid Mattermost API URL",
+			amVersion: &version30,
+			globalConfig: &monitoringv1.AlertmanagerGlobalConfig{
+				MattermostConfig: &monitoringv1.GlobalMattermostConfig{
+					APIURL: ptr.To(monitoringv1.URL(invalidMattermostAPIURL)),
+				},
+			},
+			amConfig: &monitoringv1alpha1.AlertmanagerConfig{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "global-config",
+					Namespace: "mynamespace",
+				},
+				Spec: monitoringv1alpha1.AlertmanagerConfigSpec{
+					Receivers: []monitoringv1alpha1.Receiver{
+						{
+							Name: "null",
 						},
 					},
 					Route: &monitoringv1alpha1.Route{
